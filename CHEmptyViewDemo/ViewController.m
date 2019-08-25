@@ -11,6 +11,8 @@
 #import "UIScrollView+EmptyAble.h"
 #import "EmptyViewUtil.h"
 
+#define kHeaderViewH 55
+
 @interface ViewController () <UIScrollViewEmptyDataSource, UIScrollViewEmptyDelegate>
 /** 数据源*/
 @property (nonatomic, strong) NSMutableArray<Item *> *dataSource;
@@ -26,6 +28,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.tableView.tableHeaderView = ({
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), kHeaderViewH);
+        [button addTarget:self action:@selector(headerAction:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTitle:@"This is a headerView" forState:UIControlStateNormal];
+        button.backgroundColor = UIColor.darkGrayColor;
+        button;
+    });
     self.tableView.emptyDelegate = self;
     self.tableView.emptyDataSource = self;
     UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
@@ -35,6 +45,10 @@
 }
 
 #pragma mark - action
+
+- (void)headerAction:(id)sender {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
+}
 
 - (IBAction)normalAction:(id)sender {
     self.hasData = YES;
@@ -89,6 +103,7 @@
     UIView *view = nil;
     switch (state) {
         case CHEmptyStateLoading:
+            // custom loading
             view = EmptyViewUtil.loadingView;
             break;
         case CHEmptyStateFailed:
@@ -113,6 +128,11 @@
 
 - (void)scrollView:(UIScrollView *)scrollView didTap:(UIView *)view {
     [self beginRefresh];
+}
+
+- (UIEdgeInsets)scrollView:(UIScrollView *)scrollView contentInsetForContainerView:(UIView *)containerView ofEmptyView:(UIView *)emptyView {
+    // extra inset
+    return UIEdgeInsetsMake(CGRectGetHeight(self.tableView.tableHeaderView.frame), 0 ,0 ,0);
 }
 
 - (CGFloat)scrollView:(UIScrollView *)scrollView verticleOffsetForEmptyView:(UIView *)emptyView {

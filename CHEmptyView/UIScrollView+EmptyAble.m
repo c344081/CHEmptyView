@@ -95,15 +95,21 @@ static char kEmptyViewCtx;
     containerView.tag = kEmptyContainerTag;
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(CH_empty_tap:)];
     [containerView addGestureRecognizer:tapGesture];
-//    if (@available(iOS 11.0, *)) {
-//        containerView.translatesAutoresizingMaskIntoConstraints = NO;
-//        NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray array];
-//        [constraints addObject:[containerView.leadingAnchor constraintEqualToAnchor:self.contentLayoutGuide.leadingAnchor]];
-//        [constraints addObject:[containerView.trailingAnchor constraintEqualToAnchor:self.frameLayoutGuide.trailingAnchor]];
-//        [constraints addObject:[containerView.topAnchor constraintEqualToAnchor:self.contentLayoutGuide.topAnchor]];
-//        [constraints addObject:[containerView.bottomAnchor constraintEqualToAnchor:self.frameLayoutGuide.bottomAnchor]];
-//        [NSLayoutConstraint activateConstraints:constraints];
-//    } else {
+    
+    UIEdgeInsets containerInsets = UIEdgeInsetsZero;
+    if ([self.emptyDelegate respondsToSelector:@selector(scrollView:contentInsetForContainerView:ofEmptyView:)]) {
+        containerInsets = [self.emptyDelegate scrollView:self contentInsetForContainerView:containerView ofEmptyView:emptyView];
+    }
+    
+    if (@available(iOS 11.0, *)) {
+        containerView.translatesAutoresizingMaskIntoConstraints = NO;
+        NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray array];
+        [constraints addObject:[containerView.leftAnchor constraintEqualToAnchor:self.contentLayoutGuide.leftAnchor constant:containerInsets.left]];
+        [constraints addObject:[containerView.rightAnchor constraintEqualToAnchor:self.frameLayoutGuide.rightAnchor constant:-containerInsets.right]];
+        [constraints addObject:[containerView.topAnchor constraintEqualToAnchor:self.contentLayoutGuide.topAnchor constant:containerInsets.top]];
+        [constraints addObject:[containerView.bottomAnchor constraintEqualToAnchor:self.frameLayoutGuide.bottomAnchor constant:-containerInsets.bottom]];
+        [NSLayoutConstraint activateConstraints:constraints];
+    } else {
         CHEmptyViewObserver *observer = objc_getAssociatedObject(containerView, _cmd);
         if (!observer) {
             observer = [[CHEmptyViewObserver alloc] init];
@@ -114,10 +120,10 @@ static char kEmptyViewCtx;
                 __strong __auto_type self = weakSelf;
                 __strong __auto_type containerView = weakContainerView;
                 CGPoint offset = [value CGPointValue];
-                containerView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame) + offset.x, CGRectGetHeight(self.frame) + offset.y);
+                containerView.frame = CGRectMake(containerInsets.left, containerInsets.top, CGRectGetWidth(self.frame) + offset.x - containerInsets.left - containerInsets.right, CGRectGetHeight(self.frame) + offset.y - containerInsets.top - containerInsets.bottom);
             }];
         }
-//    }
+    }
     
     // 添加背景视图
     UIView *backgroundView = nil;

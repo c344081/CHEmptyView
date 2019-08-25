@@ -68,6 +68,19 @@ typedef NS_ENUM(NSUInteger, CHEmptyState) {
 - (CGFloat)scrollView:(UIScrollView *)scrollView horizontalOffsetForEmptyView:(UIView *)emptyView;
 
 /**
+ 空视图容器视图的边距
+
+ @note 通常用来展示tableHeaderView
+ @param scrollView 滚动视图
+ @param containerView 空视图的容器视图
+ @param emptyView 空视图
+ @return 边距
+ */
+- (UIEdgeInsets)scrollView:(UIScrollView *)scrollView
+contentInsetForContainerView:(UIView *)containerView
+               ofEmptyView:(UIView *)emptyView;
+
+/**
  特定状态下是否能显示空视图
  
  @note 默认状态不显示, 其他显示
